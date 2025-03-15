@@ -5,58 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Simple Calculator</title>
     <link rel="icon" href="calc.webp" type="image/webp">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            background-color: #f0f0f0;
-        }
-        .calculator {
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            padding: 20px;
-            width: 260px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 5px;
-            margin: auto;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .calculator input[type="text"] {
-            grid-column: span 4;
-            height: 40px;
-            font-size: 1.2em;
-            text-align: right;
-            margin-bottom: 10px;
-            padding: 5px;
-            box-sizing: border-box;
-        }
-        button {
-            height: 40px;
-            font-size: 1em;
-            cursor: pointer;
-            user-select: none;
-            outline: none;
-        }
-        button:focus {
-            outline: none;
-        }
-        button.operator {
-            background-color: #ff9500;
-            color: white;
-        }
-        button.equal {
-            background-color: #34c759;
-            color: white;
-            grid-column: span 2;
-        }
-    </style>
+    <link rel="stylesheet" href="index.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.addEventListener('touchstart', function(event) {
@@ -67,27 +16,36 @@
         });
 
         document.addEventListener('keydown', function(event) {
-            event.preventDefault();
-            if ((event.key >= '0' && event.key <= '9') || ['+', '-', '*', '/', '(', ')'].includes(event.key)) {
-                if(['+', '-', '*', '/'].includes(event.key)) {
-                    appendOperator(event.key);
-                } else {
-                    appendValue(event.key);
-                }
-            } else if (event.key === '.') {
-                appendDot('.');
-            } else if (event.key === 'Backspace') {
-                deleteLastChar();
-            } else if (event.key === 'Delete') {
-                clearResult();
-            } else if (event.key === 'Enter') {
-                calculate();
-            }
-        });
+    // Only prevent default for calculator-related keys
+    if ((event.key >= '0' && event.key <= '9') || 
+        ['+', '-', '*', '/', '.', '(', ')', 'Backspace', 'Delete', 'Enter'].includes(event.key)) {
+        
+        event.preventDefault();
+        
+        if ((event.key >= '0' && event.key <= '9') || ['(', ')'].includes(event.key)) {
+            appendValue(event.key);
+        } else if (['+', '-', '*', '/'].includes(event.key)) {
+            appendOperator(event.key);
+        } else if (event.key === '.') {
+            appendDot('.');
+        } else if (event.key === 'Backspace') {
+            deleteLastChar();
+        } else if (event.key === 'Delete') {
+            clearResult();
+        } else if (event.key === 'Enter') {
+            calculate();
+        }
+    }
+});
 
         function appendValue(value) {
-            document.getElementById('result').value += value;
-        }
+    let currentValue = document.getElementById('result').value;
+    if (currentValue === 'Error') {
+        clearResult();
+        currentValue = '';
+    }
+    document.getElementById('result').value += value;
+}
 
         function appendOperator(operator) {
             let currentValue = document.getElementById('result').value;
@@ -118,20 +76,20 @@
     }
 }
 
-        function clearResult() {
-            document.getElementById('result').value = '';
-        }
+function clearResult() {
+    document.getElementById('result').value = '';
+}
 
-        function deleteLastChar() {
-            let inputField = document.getElementById('result');
-            if (inputField.value === 'Error') {
-                clearResult();
-            } else {
-                inputField.value = inputField.value.slice(0, -1);
-            }
-        }
+function deleteLastChar() {
+    let inputField = document.getElementById('result');
+    if (inputField.value === 'Error') {
+        clearResult();
+    } else {
+        inputField.value = inputField.value.slice(0, -1);
+    }
+}
 
-        function calculate() {
+function calculate() {
     let expression = document.getElementById('result').value;
     
     // If expression is empty, do nothing
@@ -141,7 +99,21 @@
     expression = expression.replace(/(\d)\(/g, '$1*(').replace(/\)(\d)/g, ')*$1');
     
     try {
-        let result = eval(expression);
+        // Instead of using eval directly, we'll parse the expression more carefully
+        // Split the expression into parts (numbers and operators)
+        let formattedExpression = expression;
+        
+        // Handle numbers with leading zeros but preserve decimal numbers like 0.123
+        formattedExpression = formattedExpression.replace(/(-?\d*\.\d+)|(-?\d+)/g, function(match) {
+            // If it's a decimal number, leave it as is
+            if (match.includes('.')) return match;
+            
+            // If it's a whole number with leading zeros, preserve its value
+            // but convert to a proper number format
+            return String(Number(match));
+        });
+        
+        let result = eval(formattedExpression);
         
         // Convert to string first to properly handle decimal values
         let resultStr = result.toString();
@@ -168,6 +140,7 @@
         document.getElementById('result').value = 'Error';
     }
 }
+
 
 
 

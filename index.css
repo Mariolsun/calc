@@ -1,0 +1,56 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+.calculator {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 20px;
+    width: 320px; /* Increased from 260px */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px; /* Increased from 5px */
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.calculator input[type="text"] {
+    grid-column: span 4;
+    height: 60px; /* Increased from 40px */
+    font-size: 1.5em; /* Increased from 1.2em */
+    font-weight: 600; /* Added bold weight */
+    color: #000000; /* Explicitly set to black */
+    text-align: right;
+    margin-bottom: 15px; /* Increased from 10px */
+    padding: 10px; /* Increased from 5px */
+    box-sizing: border-box;
+}
+button {
+    height: 50px; /* Increased from 40px */
+    font-size: 1.25em; /* Increased from 1em */
+    font-weight: 600; /* Added bold weight */
+    color: #000000; /* Explicitly set to black */
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    border-radius: 5px; /* Added rounded corners */
+    border: 1px solid #ddd;
+}
+button:focus {
+    outline: none;
+}
+button.operator {
+    background-color: #ff9500;
+    color: black; /* Changed from white to black */
+}
+button.equal {
+    background-color: #34c759;
+    color: black; /* Changed from white to black */
+    grid-column: span 2;
+}

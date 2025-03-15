@@ -143,7 +143,7 @@
     function calculate() {
         let expression = document.getElementById('result').value;
         if (!expression.trim()) return;
-        expression = expression.replace(/(\d)\(/g, '$1*(').replace(/\)(\d)/g, ')*$1').replace(/\b0+(\d)/g, '$1');
+        expression = expression.replace(/(\d)\(/g, '$1*(').replace(/\)(\d)/g, ')*$1');
         try {
             let result = eval(expression);
             document.getElementById('result').value = parseFloat(result.toFixed(10));

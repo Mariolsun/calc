@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Simple Calculator</title>
     <link rel="icon" href="calc.webp" type="image/webp">
     <style>
@@ -58,9 +58,119 @@
         }
     </style>
     <script>
-        window.onload = function() {
-            window.resizeTo(300, 400);
-        };
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+        });
+
+        document.addEventListener('keydown', function(event) {
+            event.preventDefault();
+            if ((event.key >= '0' && event.key <= '9') || ['+', '-', '*', '/', '(', ')'].includes(event.key)) {
+                if(['+', '-', '*', '/'].includes(event.key)) {
+                    appendOperator(event.key);
+                } else {
+                    appendValue(event.key);
+                }
+            } else if (event.key === '.') {
+                appendDot('.');
+            } else if (event.key === 'Backspace') {
+                deleteLastChar();
+            } else if (event.key === 'Delete') {
+                clearResult();
+            } else if (event.key === 'Enter') {
+                calculate();
+            }
+        });
+
+        function appendValue(value) {
+            document.getElementById('result').value += value;
+        }
+
+        function appendOperator(operator) {
+            let currentValue = document.getElementById('result').value;
+            if (currentValue !== '' && !/[+\-*/]$/.test(currentValue.slice(-1))) {
+                document.getElementById('result').value += operator;
+            }
+        }
+
+        function appendDot(dot) {
+    let currentValue = document.getElementById('result').value;
+    
+    // If the display shows "Error", clear it first
+    if (currentValue === 'Error') {
+        clearResult();
+        currentValue = '';
+    }
+    
+    // Check if the input is empty or ends with an operator
+    if (currentValue === '' || /[+\-*/]$/.test(currentValue)) {
+        document.getElementById('result').value += '0' + dot;
+        return;
+    }
+    
+    // Split by operators and check if the last number already has a decimal
+    let parts = currentValue.split(/[-+*/]/);
+    if (!parts[parts.length - 1].includes('.')) {
+        document.getElementById('result').value += dot;
+    }
+}
+
+        function clearResult() {
+            document.getElementById('result').value = '';
+        }
+
+        function deleteLastChar() {
+            let inputField = document.getElementById('result');
+            if (inputField.value === 'Error') {
+                clearResult();
+            } else {
+                inputField.value = inputField.value.slice(0, -1);
+            }
+        }
+
+        function calculate() {
+    let expression = document.getElementById('result').value;
+    
+    // If expression is empty, do nothing
+    if (!expression.trim()) return;
+    
+    // Handle implicit multiplication
+    expression = expression.replace(/(\d)\(/g, '$1*(').replace(/\)(\d)/g, ')*$1');
+    
+    try {
+        let result = eval(expression);
+        
+        // Convert to string first to properly handle decimal values
+        let resultStr = result.toString();
+        
+        // If it's a decimal number, ensure we don't lose trailing zeros
+        if (resultStr.includes('.')) {
+            // Format to 10 decimal places maximum
+            resultStr = parseFloat(result.toFixed(10)).toString();
+            
+            // Check if we need to preserve trailing zeros (if original had them)
+            let originalParts = expression.split(/[-+*/]/);
+            let lastPart = originalParts[originalParts.length - 1];
+            
+            // If the last part of the expression had a decimal with trailing zeros
+            if (lastPart.includes('.') && lastPart.endsWith('0')) {
+                // Preserve the proper number of decimal places
+                document.getElementById('result').value = result.toFixed(10).replace(/0+$/, '').replace(/\.$/, '');
+                return;
+            }
+        }
+        
+        document.getElementById('result').value = resultStr;
+    } catch (e) {
+        document.getElementById('result').value = 'Error';
+    }
+}
+
+
+
     </script>
 </head>
 <body>
@@ -91,66 +201,5 @@
     <button onclick="appendDot('.')">.</button>
     <button class="equal" onclick="calculate()">=</button>
 </div>
-
-<script>
-    document.addEventListener('keydown', function(event) {
-        event.preventDefault();
-        if ((event.key >= '0' && event.key <= '9') || ['+', '-', '*', '/', '(', ')'].includes(event.key)) {
-            if(['+', '-', '*', '/'].includes(event.key)) {
-                appendOperator(event.key);
-            } else {
-                appendValue(event.key);
-            }
-        } else if (event.key === '.') {
-            appendDot('.');
-        } else if (event.key === 'Backspace') {
-            deleteLastChar();
-        } else if (event.key === 'Delete') {
-            clearResult();
-        } else if (event.key === 'Enter') {
-            calculate();
-        }
-    });
-
-    function appendValue(value) {
-        document.getElementById('result').value += value;
-    }
-
-    function appendOperator(operator) {
-        let currentValue = document.getElementById('result').value;
-        if (currentValue !== '' && !/[+\-*/]$/.test(currentValue.slice(-1))) {
-            document.getElementById('result').value += operator;
-        }
-    }
-
-    function appendDot(dot) {
-        let currentValue = document.getElementById('result').value;
-        let parts = currentValue.split(/[-+*/]/);
-        if (!parts[parts.length - 1].includes('.')) {
-            document.getElementById('result').value += dot;
-        }
-    }
-
-    function clearResult() {
-        document.getElementById('result').value = '';
-    }
-
-    function deleteLastChar() {
-        let inputField = document.getElementById('result');
-        inputField.value = inputField.value.slice(0, -1);
-    }
-
-    function calculate() {
-        let expression = document.getElementById('result').value;
-        if (!expression.trim()) return;
-        expression = expression.replace(/(\d)\(/g, '$1*(').replace(/\)(\d)/g, ')*$1');
-        try {
-            let result = eval(expression);
-            document.getElementById('result').value = parseFloat(result.toFixed(10));
-        } catch (e) {
-            document.getElementById('result').value = 'Error';
-        }
-    }
-</script>
 </body>
 </html>
